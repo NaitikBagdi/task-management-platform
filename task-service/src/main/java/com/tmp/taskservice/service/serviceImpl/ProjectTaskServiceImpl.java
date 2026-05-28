@@ -13,6 +13,7 @@ import com.tmp.taskservice.enums.Priority;
 import com.tmp.taskservice.enums.Status;
 import com.tmp.taskservice.repository.ProjectRepository;
 import com.tmp.taskservice.repository.TaskRepository;
+import com.tmp.taskservice.service.AuthServiceClient;
 import com.tmp.taskservice.service.ProjectTaskService;
 
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class ProjectTaskServiceImpl implements ProjectTaskService {
 
 	private final ProjectRepository projectRepository;
 	private final TaskRepository taskRepository;
+	private final AuthServiceClient authServiceClient;
 
 	// --- PROJECT METHODS ---
 	@Override
@@ -102,12 +104,23 @@ public class ProjectTaskServiceImpl implements ProjectTaskService {
 	}
 
 	@Override
-	public Task assignTask(UUID taskId, UUID assigneeUserId) {
+	public Task assignTask(UUID projectId, UUID taskId, UUID assigneeUserId) {
 		Task task = getTaskById(taskId);
-		// Note: Application layer validation for absolute verification can be
-		// implemented here if required
-		task.setAssigneeUserId(assigneeUserId);
-		return taskRepository.save(task);
+
+        // 2. Pure Business Check: Path and resources verification
+        if (!task.getProjectId().equals(projectId)) {
+            throw new IllegalArgumentException("Cross-resource mismatch: Task does not belong to the specified project");
+        }
+
+        // 3. Clean Cross-Service Check via Client Gateway (Requirement 4.3)
+        boolean isUserValidAndActive = authServiceClient.isUserActive(assigneeUserId);
+        if (!isUserValidAndActive) {
+            throw new IllegalArgumentException("Assignment failed: The requested assignee user account is inactive");
+        }
+
+        // 4. Persistence State Update
+        task.setAssigneeUserId(assigneeUserId);
+        return taskRepository.save(task);
 	}
 	
 	@Override

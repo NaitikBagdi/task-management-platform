@@ -28,7 +28,7 @@ public interface ProjectTaskService {
 
 	public Task updateTask(UUID taskId, TaskRequest request);
 
-	public Task assignTask(UUID taskId, UUID assigneeUserId);
+	public Task assignTask(UUID projectId, UUID taskId, UUID assigneeUserId);
 
 	public Task transitionStatus(UUID taskId, String newStatusStr);
 

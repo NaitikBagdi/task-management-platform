@@ -96,7 +96,7 @@ public class ProjectTaskController {
     @IsAdmin
     @PatchMapping("/projects/{pid}/tasks/{tid}/assign")
     public ResponseEntity<Task> assignTask(@PathVariable UUID pid, @PathVariable UUID tid, @Valid @RequestBody AssignUserRequest request) {
-        return ResponseEntity.ok(projectTaskService.assignTask(tid, UUID.fromString(request.getAssigneeUserId())));
+        return ResponseEntity.ok(projectTaskService.assignTask(pid, tid, UUID.fromString(request.getAssigneeUserId())));
     }
 
     @IsAdminOrUser
