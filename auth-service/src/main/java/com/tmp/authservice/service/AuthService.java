@@ -17,4 +17,6 @@ public interface AuthService {
 	public UserResponse getUserById(UUID id);
 
 	public List<UserResponse> getAllUsers();
+
+	UserResponse getCurrentUserProfile(UUID userId);
 }

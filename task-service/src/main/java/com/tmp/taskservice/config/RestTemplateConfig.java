@@ -15,7 +15,6 @@ public class RestTemplateConfig {
     @Bean
     public RestTemplate authServiceRestTemplate() {
         RestTemplate restTemplate = new RestTemplate();
-        // Base URL set karne se baar-baar code mein full URL nahi likhna padta
         restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory(authServiceBaseUrl));
         return restTemplate;
     }

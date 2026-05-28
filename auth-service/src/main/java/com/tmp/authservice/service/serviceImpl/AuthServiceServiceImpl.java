@@ -29,39 +29,19 @@ public class AuthServiceServiceImpl implements AuthService {
 
 	@Override
 	public UserResponse registerUser(RegisterRequest request) {
-		if (userRepository.existsByEmail(request.getEmail())) {
-			throw new RuntimeException("Email already registered!");
-		}
-
+		if (userRepository.existsByEmail(request.getEmail())) throw new RuntimeException("Email already registered!");
 		Role userRole = Role.USER;
-		if (request.getRole() != null && request.getRole().equalsIgnoreCase("ADMIN")) {
-			userRole = Role.ADMIN;
-		}
-
-		// Lombok Builder usage
-		User user = User.builder().email(request.getEmail()).passwordHash(passwordEncoder.encode(request.getPassword()))
-				.fullName(request.getFullName()).role(userRole).build();
-
+		if (request.getRole() != null && request.getRole().equalsIgnoreCase("ADMIN")) userRole = Role.ADMIN;
+		User user = User.builder().email(request.getEmail()).passwordHash(passwordEncoder.encode(request.getPassword())).fullName(request.getFullName()).role(userRole).build();
 		User savedUser = userRepository.save(user);
-
-		return UserResponse.builder().id(savedUser.getId()).email(savedUser.getEmail())
-				.fullName(savedUser.getFullName()).role(savedUser.getRole().name()).isActive(savedUser.isActive())
-				.build();
+		return UserResponse.builder().id(savedUser.getId()).email(savedUser.getEmail()).fullName(savedUser.getFullName()).role(savedUser.getRole().name()).isActive(savedUser.isActive()).build();
 	}
 
 	@Override
 	public AuthResponse loginUser(LoginRequest request) {
-		User user = userRepository.findByEmail(request.getEmail())
-				.orElseThrow(() -> new RuntimeException("Invalid email or password"));
-
-		if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-			throw new RuntimeException("Invalid email or password");
-		}
-
-		if (!user.isActive()) {
-			throw new RuntimeException("User account is inactive");
-		}
-
+		User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new RuntimeException("Invalid email or password"));
+		if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) throw new RuntimeException("Invalid email or password");
+		if (!user.isActive()) throw new RuntimeException("User account is inactive");
 		String token = tokenProvider.generateToken(user.getId(), user.getEmail(), user.getRole().name());
 		return new AuthResponse(token);
 	}
@@ -75,5 +55,11 @@ public class AuthServiceServiceImpl implements AuthService {
 	@Override
 	public List<UserResponse> getAllUsers() {
 		return userRepository.findAll().stream().map(user -> UserResponse.builder().id(user.getId()).email(user.getEmail()).fullName(user.getFullName()).role(user.getRole().name()).isActive(user.isActive()).build()).collect(Collectors.toList());
+	}
+
+	@Override
+	public UserResponse getCurrentUserProfile(UUID userId) {
+		User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User profile not found with the provided identification context"));
+	    return new UserResponse(user.getId(), user.getEmail(), user.getFullName(), user.getRole().name(), user.isActive());
 	}
 }

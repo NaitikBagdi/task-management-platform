@@ -1,10 +1,10 @@
-package com.tmp.taskservice.exception;
+package com.tmp.authservice.exception;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -26,13 +26,12 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
-
-    @ExceptionHandler(AuthorizationDeniedException.class)
-    public ResponseEntity<ErrorResponse> handleAuthorizationDenied(AuthorizationDeniedException ex, HttpServletRequest request) {
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
         ErrorResponse body = new ErrorResponse(LocalDateTime.now(), HttpStatus.FORBIDDEN.value(), "Insufficient privileges: " + ex.getMessage(), request.getRequestURI());
-        return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
- 
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest request) {
         String errorMessage = ex.getBindingResult().getFieldErrors().stream() .map(error -> error.getField() + ": " + error.getDefaultMessage()).reduce((first, second) -> first + ", " + second).orElse("Validation failed");

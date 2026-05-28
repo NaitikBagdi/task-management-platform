@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,11 +12,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tmp.authservice.config.AuthService;
 import com.tmp.authservice.dto.request.LoginRequest;
 import com.tmp.authservice.dto.request.RegisterRequest;
 import com.tmp.authservice.dto.response.AuthResponse;
 import com.tmp.authservice.dto.response.UserResponse;
+import com.tmp.authservice.service.AuthService;
 
 import jakarta.validation.Valid;
 
@@ -48,4 +49,11 @@ public class AuthController {
     public ResponseEntity<List<UserResponse>> getAllUsers() {
         return ResponseEntity.ok(authService.getAllUsers());
     }
+
+    @GetMapping("/users/me")
+    public ResponseEntity<UserResponse> getMyProfile(@AuthenticationPrincipal String userId) {
+        UserResponse profile = authService.getCurrentUserProfile(UUID.fromString(userId));
+        return ResponseEntity.ok(profile);
+    }
+
 }

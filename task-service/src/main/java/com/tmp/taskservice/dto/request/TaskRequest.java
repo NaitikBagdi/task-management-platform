@@ -9,8 +9,12 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class TaskRequest {
-    @NotBlank(message = "Task title is required")
+
+	@NotBlank(message = "Task title is required")
     private String title;
-    private String description;
-    private String priority; // LOW, MEDIUM, HIGH
+
+	private String description;
+
+	private String priority; // LOW, MEDIUM, HIGH
+
 }
