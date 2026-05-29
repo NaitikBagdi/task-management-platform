@@ -26,11 +26,9 @@ public class ProjectTaskServiceImpl implements ProjectTaskService {
 	private final TaskRepository taskRepository;
 	private final AuthServiceClient authServiceClient;
 
-	// --- PROJECT METHODS ---
 	@Override
 	public Project createProject(ProjectRequest request, String ownerId) {
-		Project project = Project.builder().name(request.getName()).description(request.getDescription())
-				.ownerUserId(UUID.fromString(ownerId)).build();
+		Project project = Project.builder().name(request.getName()).description(request.getDescription()).ownerUserId(UUID.fromString(ownerId)).build();
 		return projectRepository.save(project);
 	}
 
@@ -41,8 +39,7 @@ public class ProjectTaskServiceImpl implements ProjectTaskService {
 
 	@Override
 	public Project getProjectById(UUID id) {
-		return projectRepository.findById(id)
-				.orElseThrow(() -> new RuntimeException("Project not found with status 404"));
+		return projectRepository.findById(id).orElseThrow(() -> new RuntimeException("Project not found with status 404"));
 	}
 
 	@Override
@@ -59,20 +56,14 @@ public class ProjectTaskServiceImpl implements ProjectTaskService {
 		projectRepository.delete(project);
 	}
 
-	// --- TASK METHODS ---
 	@Override
 	public Task createTask(UUID projectId, TaskRequest request) {
-		// Confirm project exists
 		getProjectById(projectId);
-
 		Priority taskPriority = Priority.LOW;
 		if (request.getPriority() != null) {
 			taskPriority = Priority.valueOf(request.getPriority().toUpperCase());
 		}
-
-		Task task = Task.builder().projectId(projectId).title(request.getTitle()).description(request.getDescription())
-				.priority(taskPriority).status(Status.TODO).build();
-
+		Task task = Task.builder().projectId(projectId).title(request.getTitle()).description(request.getDescription()).priority(taskPriority).status(Status.TODO).build();
 		return taskRepository.save(task);
 	}
 
@@ -88,8 +79,7 @@ public class ProjectTaskServiceImpl implements ProjectTaskService {
 
 	@Override
 	public Task getTaskById(UUID taskId) {
-		return taskRepository.findById(taskId)
-				.orElseThrow(() -> new RuntimeException("Task not found with status 404"));
+		return taskRepository.findById(taskId).orElseThrow(() -> new RuntimeException("Task not found with status 404"));
 	}
 
 	@Override
@@ -106,19 +96,13 @@ public class ProjectTaskServiceImpl implements ProjectTaskService {
 	@Override
 	public Task assignTask(UUID projectId, UUID taskId, UUID assigneeUserId) {
 		Task task = getTaskById(taskId);
-
-        // 2. Pure Business Check: Path and resources verification
         if (!task.getProjectId().equals(projectId)) {
             throw new IllegalArgumentException("Cross-resource mismatch: Task does not belong to the specified project");
         }
-
-        // 3. Clean Cross-Service Check via Client Gateway (Requirement 4.3)
         boolean isUserValidAndActive = authServiceClient.isUserActive(assigneeUserId);
         if (!isUserValidAndActive) {
             throw new IllegalArgumentException("Assignment failed: The requested assignee user account is inactive");
         }
-
-        // 4. Persistence State Update
         task.setAssigneeUserId(assigneeUserId);
         return taskRepository.save(task);
 	}
@@ -128,8 +112,6 @@ public class ProjectTaskServiceImpl implements ProjectTaskService {
 		Task task = getTaskById(taskId);
 		Status currentStatus = task.getStatus();
 		Status newStatus = Status.valueOf(newStatusStr.toUpperCase());
-
-		// Strict Status Transition Specification (Requirement 4.3 Rules)
 		if (currentStatus == Status.TODO && newStatus != Status.IN_PROGRESS) {
 			throw new IllegalArgumentException("Invalid status transition: TODO can only move to IN_PROGRESS");
 		}
@@ -139,7 +121,6 @@ public class ProjectTaskServiceImpl implements ProjectTaskService {
 		if (currentStatus == Status.DONE && newStatus != Status.IN_PROGRESS) {
 			throw new IllegalArgumentException("Invalid status transition: DONE can only move back to IN_PROGRESS");
 		}
-
 		task.setStatus(newStatus);
 		return taskRepository.save(task);
 	}
@@ -154,4 +135,5 @@ public class ProjectTaskServiceImpl implements ProjectTaskService {
 	public List<Task> getMyTasks(String currentUserId) {
 		return taskRepository.findByAssigneeUserId(UUID.fromString(currentUserId));
 	}
+
 }

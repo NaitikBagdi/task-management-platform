@@ -42,10 +42,7 @@ public class SecurityConfig {
 							response.getWriter().write("{\"status\":403,\"message\":\"Insufficient privileges\"}");
 						}))
 				.authorizeHttpRequests(auth -> auth
-						// 🔐 Saare endpoints bypass honge yahan se, authorization controller taya
-						// karega
 						.anyRequest().authenticated());
-
 		http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 		return http.build();
 	}

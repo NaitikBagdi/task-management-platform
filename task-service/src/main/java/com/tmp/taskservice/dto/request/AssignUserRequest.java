@@ -8,6 +8,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AssignUserRequest {
-    @NotBlank(message = "Assignee user ID is required")
-    private String assigneeUserId;
+
+	@NotBlank(message = "Assignee user ID is required")
+	private String assigneeUserId;
+
 }

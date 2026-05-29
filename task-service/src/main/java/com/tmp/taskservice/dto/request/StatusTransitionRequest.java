@@ -14,4 +14,5 @@ public class StatusTransitionRequest {
   
 	@NotBlank(message = "Status is required")
     private String status; // TODO, IN_PROGRESS, DONE
+
 }
