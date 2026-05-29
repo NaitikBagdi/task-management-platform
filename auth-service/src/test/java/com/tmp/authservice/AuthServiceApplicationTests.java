@@ -1,4 +1,4 @@
-package com.tmp.auth_service;
+package com.tmp.authservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
